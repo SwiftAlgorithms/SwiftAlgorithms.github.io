@@ -63,7 +63,7 @@
 <span class="k">let</span> <span class="n">onePlusTwo</span> <span class="o">=</span> <span class="n">add</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="c1">// 3</span></code></pre></div>
 
-<p>But imagine now that we want to use map to add 2 to every element on a list</p>
+<p>But imagine now that we want to use <code>map</code> to add 2 to every element on a list</p>
 
 <div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">let</span> <span class="n">someNumbers</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">21</span><span class="p">]</span></code></pre></div>
 
@@ -86,14 +86,14 @@
     <span class="k">return</span> <span class="p">{</span> <span class="n">b</span> <span class="k">in</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">}</span>
 <span class="p">}</span></code></pre></div>
 
-<p>Instead of getting two Ints as parameters and returning a resulting Int, this function gets just one parameter and then returns a second function. Yep, functions can return functions, deep breath.</p>
+<p>Instead of getting two <code>Int</code>s as parameters and returning a resulting <code>Int</code>, this function gets just one parameter and then returns a second function. Yep, functions can return functions, deep breath.</p>
 
-<p>So let&#39;s take a look into that second function, its type is <code>Int -&gt; Int</code>. This means that it takes just a single Int and returns another Int. Let&#39;s see it in action:</p>
+<p>So let&#39;s take a look into that second function, its type is <code>Int -&gt; Int</code>. This means that it takes just a single <code>Int</code> and returns another <code>Int</code>. Let&#39;s see it in action:</p>
 
 <div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">let</span> <span class="n">plusFive</span> <span class="o">=</span> <span class="n">addCurried</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 <span class="c1">// Int -&gt; Int</span></code></pre></div>
 
-<p>This creates a function that will take an Int and add 5 to it. We can also say that <code>addCurried</code> has been <em>partially applied</em> and is now missing its last parameter.</p>
+<p>This creates a function that will take an <code>Int</code> and add 5 to it. We can also say that <code>addCurried</code> has been <em>partially applied</em> and is now missing its last parameter.</p>
 
 <div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">let</span> <span class="n">twoPlusFive</span> <span class="o">=</span> <span class="n">plusFive</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 <span class="c1">// 7</span></code></pre></div>
