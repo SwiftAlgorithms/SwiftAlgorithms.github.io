@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Currying</title>
+  <meta name="description" content="Let&#39;s take a look into the super cool world garden of function currying. We&#39;re used to call functions like this:">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://SwiftAlgorithms.com/Currying">
+  <script src="assets/ph.js" type="text/javascript"></script>
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/"><img src="../assets/logo.png" alt="Swift Algorithms">Swift Algorithms</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+
+
+
+      <div class="wrapper">
+
+        <h1 class="post-title">Currying</h1>
+
+        <p>Let&#39;s take a look into the super cool <del>world</del> garden of function currying. We&#39;re used to call functions like this:</p>
+
+<div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">func</span> <span class="n">add</span><span class="p">(</span><span class="nl">a</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">_</span> <span class="nl">b</span><span class="p">:</span> <span class="n">Int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Int</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+<span class="p">}</span>
+
+<span class="k">let</span> <span class="n">onePlusTwo</span> <span class="o">=</span> <span class="n">add</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="c1">// 3</span></code></pre></div>
+
+<p>But imagine now that we want to use map to add 2 to every element on a list</p>
+
+<div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">21</span><span class="p">]</span></code></pre></div>
+
+<p>We would need to create a brand new function from scratch that takes one <code>Int</code> and adds 2 to it</p>
+
+<div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">func</span> <span class="n">plusTwo</span><span class="p">(</span><span class="nl">a</span><span class="p">:</span> <span class="n">Int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Int</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="mi">2</span>
+<span class="p">}</span></code></pre></div>
+
+<p>We can now just pass this function to <code>map</code> and get what we are looking for, oh yes.</p>
+
+<div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">let</span> <span class="n">someNumbersPlusTwo</span> <span class="o">=</span> <span class="n">someNumbers</span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="n">plusTwo</span><span class="p">)</span>
+<span class="c1">// [3, 4, 5, 7, 10, 15]</span></code></pre></div>
+
+<p>A part of me wants to celebrate, but the other one feels this could be improved. What happens if we now want to do the same thing but adding 3 instead? We need to go back and create a new function from scratch again. Yeah, that is not great.</p>
+
+<p>Ok, let&#39;s see what is this famous currying all about then. Here&#39;s the same initial <code>add</code> function but in a curried form.</p>
+
+<div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">func</span> <span class="nf">addCurried</span><span class="p">(</span><span class="nl">a</span><span class="p">:</span> <span class="n">Int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">Int</span> <span class="o">-&gt;</span> <span class="n">Int</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">{</span> <span class="n">b</span> <span class="k">in</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">}</span>
+<span class="p">}</span></code></pre></div>
+
+<p>Instead of getting two Ints as parameters and returning a resulting Int, this function gets just one parameter and then returns a second function. Yep, functions can return functions, deep breath.</p>
+
+<p>So let&#39;s take a look into that second function, its type is <code>Int -&gt; Int</code>. This means that it takes just a single Int and returns another Int. Let&#39;s see it in action:</p>
+
+<div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">let</span> <span class="n">plusFive</span> <span class="o">=</span> <span class="n">addCurried</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="c1">// Int -&gt; Int</span></code></pre></div>
+
+<p>This creates a function that will take an Int and add 5 to it. We can also say that <code>addCurried</code> has been <em>partially applied</em> and is now missing its last parameter.</p>
+
+<div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">let</span> <span class="n">twoPlusFive</span> <span class="o">=</span> <span class="n">plusFive</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="c1">// 7</span></code></pre></div>
+
+<p>We have now provided the last parameter needed so we get back the result of the addition. Of course we can do it in a single line as well, for example:</p>
+
+<div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">let</span> <span class="n">threePlusSeven</span> <span class="o">=</span> <span class="n">addCurried</span><span class="p">(</span><span class="mi">3</span><span class="p">)(</span><span class="mi">7</span><span class="p">)</span>
+<span class="c1">// 10</span></code></pre></div>
+
+<p>We can now go back to our original example, using currying instead</p>
+
+<div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">let</span> <span class="n">plusThree</span> <span class="o">=</span> <span class="n">addCurried</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="k">let</span> <span class="n">someNumbersPlusThree</span> <span class="o">=</span> <span class="n">someNumbers</span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="n">plusThree</span><span class="p">)</span>
+<span class="c1">// [4, 5, 6, 8, 11, 16]</span></code></pre></div>
+
+<p>Currying allows us to very quickly create new functions by partially applying existing ones.</p>
+
+<h3>Buit-in Currying</h3>
+
+<p>So currying is lovely, wouldn&#39;t it be great if there was an easier way to make curried versions of our functions? Well, thankfully there is 😎</p>
+
+<p>Swift has built-in support for currying, we just need to define our functions like so:</p>
+
+<div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">func</span> <span class="n">plus</span><span class="p">(</span><span class="nl">a</span><span class="p">:</span> <span class="n">Int</span><span class="p">)(</span><span class="n">_</span> <span class="nl">b</span><span class="p">:</span> <span class="n">Int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Int</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+<span class="p">}</span></code></pre></div>
+
+<p>And now we can call it with just one parameter</p>
+
+<div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">let</span> <span class="n">plusNine</span> <span class="o">=</span> <span class="n">plus</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span>
+<span class="c1">// Int -&gt; Int</span></code></pre></div>
+
+<p>...to get a partially applied function.</p>
+
+<p>Or with all the parameters</p>
+
+<div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">let</span> <span class="n">eightPlusOne</span> <span class="o">=</span> <span class="n">plus</span><span class="p">(</span><span class="mi">8</span><span class="p">)(</span><span class="mi">1</span><span class="p">)</span>
+<span class="c1">// 9</span></code></pre></div>
+
+<p>...to get an actual value. Awesome right?</p>
+
+<p>With this technique we can now even curry functions that we don&#39;t know how they are implemented, like when we are working with some third party frameworks. For example:</p>
+
+<div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">class</span> <span class="n">MysteriousFramework</span> <span class="p">{</span>
+    <span class="k">class</span> <span class="k">func</span> <span class="n">blackMagicMethod</span><span class="p">(</span><span class="nl">spell</span><span class="p">:</span> <span class="n">String</span><span class="p">,</span> <span class="nl">energy</span><span class="p">:</span> <span class="n">Int</span> <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">String</span> <span class="p">{</span>
+        <span class="c1">// [Black magic going on...]</span>
+        <span class="k">return</span> <span class="s">&quot;</span><span class="se">\&quot;</span><span class="s">\(spell)</span><span class="se">\&quot;</span><span class="s"> spell invoked with energy \(energy)&quot;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">func</span> <span class="n">blackMagicMethod</span><span class="p">(</span><span class="nl">spell</span><span class="p">:</span> <span class="n">String</span><span class="p">)(</span><span class="n">_</span> <span class="nl">energy</span><span class="p">:</span> <span class="n">Int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">String</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">MysteriousFramework</span><span class="p">.</span><span class="n">blackMagicMethod</span><span class="p">(</span><span class="n">spell</span><span class="p">,</span> <span class="nl">energy</span><span class="p">:</span> <span class="n">energy</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="k">let</span> <span class="n">convertPHPCodeToSwift</span> <span class="o">=</span> <span class="n">blackMagicMethod</span><span class="p">(</span><span class="s">&quot;Convert PHP code to Swift&quot;</span><span class="p">)</span>
+
+<span class="k">let</span> <span class="n">attemptOne</span> <span class="o">=</span> <span class="n">convertPHPCodeToSwift</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="c1">// &quot;Convert PHP code to Swift&quot; spell invoked with energy 3</span>
+
+<span class="k">let</span> <span class="n">attemptTwo</span> <span class="o">=</span> <span class="n">convertPHPCodeToSwift</span><span class="p">(</span><span class="mi">10000</span><span class="p">)</span>
+<span class="c1">// &quot;Convert PHP code to Swift&quot; spell invoked with energy 10000</span>
+
+<span class="k">let</span> <span class="n">attemptThree</span> <span class="o">=</span> <span class="n">convertPHPCodeToSwift</span><span class="p">(</span><span class="n">Int</span><span class="p">.</span><span class="n">max</span><span class="p">)</span>
+<span class="c1">// &quot;Convert PHP code to Swift&quot; spell invoked with energy 9223372036854775807</span></code></pre></div>
+
+<h3>Generic Currying</h3>
+
+<p>Currying is so cool that we&#39;ll probably want an even easier way to do it on the fly. In fact, we can define a generic <code>curry</code> function that takes a binary function <code>(A, B) -&gt; C</code> and returns its curried counterpart <code>A -&gt; (B -&gt; C)</code>, like so:</p>
+
+<div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">func</span> <span class="n">askBetween</span><span class="p">(</span><span class="nl">this</span><span class="p">:</span> <span class="n">String</span><span class="p">,</span> <span class="nl">that</span><span class="p">:</span> <span class="n">String</span> <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">String</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="s">&quot;\(this) or \(that)?&quot;</span>
+<span class="p">}</span></code></pre></div>
+
+<p>And now we can just curry away anything that comes across our path:</p>
+
+<div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">func</span> <span class="n">askBetween</span><span class="p">(</span><span class="nl">this</span><span class="p">:</span> <span class="n">String</span><span class="p">,</span> <span class="nl">that</span><span class="p">:</span> <span class="n">String</span> <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">String</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="s">&quot;\(this) or \(that)?&quot;</span>
+<span class="p">}</span>
+
+<span class="k">let</span> <span class="n">askBetweenSwift</span> <span class="o">=</span> <span class="n">curry</span><span class="p">(</span><span class="n">askBetween</span><span class="p">)(</span><span class="s">&quot;Swift&quot;</span><span class="p">)</span>
+<span class="k">let</span> <span class="n">otherLanguages</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;Objective-C&quot;</span><span class="p">,</span> <span class="s">&quot;Haskell&quot;</span><span class="p">,</span> <span class="s">&quot;Scala&quot;</span><span class="p">,</span> <span class="s">&quot;Whitespace&quot;</span><span class="p">]</span>
+<span class="k">let</span> <span class="n">questions</span> <span class="o">=</span> <span class="n">otherLanguages</span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="n">askBetweenSwift</span><span class="p">)</span>
+<span class="c1">// [&quot;Swift or Objective-C?&quot;, &quot;Swift or Haskell?&quot;, &quot;Swift or Scala?&quot;, &quot;Swift or Whitespace?&quot;]</span></code></pre></div>
+
+<p>Pretty fun, no?</p>
+
+<h3>Extra: Currying is everywhere</h3>
+
+<p>Ok, so now we are quite familiar with currying, but what we may have not noticed is that we have been using curried functions since the first moment we started to write Swift code. Lets take a look at some unsuspicious-looking code:</p>
+
+<div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">struct</span> <span class="n">Robot</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="nl">name</span><span class="p">:</span> <span class="n">String</span>
+    
+    <span class="k">func</span> <span class="n">greet</span><span class="p">(</span><span class="nl">someone</span><span class="p">:</span> <span class="n">String</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">String</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="s">&quot;Hello \(someone), I&#39;m \(name)!&quot;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">let</span> <span class="n">john</span> <span class="o">=</span> <span class="n">Robot</span><span class="p">(</span><span class="nl">name</span><span class="p">:</span><span class="s">&quot;John&quot;</span><span class="p">)</span>
+<span class="n">john</span><span class="p">.</span><span class="n">greet</span><span class="p">(</span><span class="s">&quot;World&quot;</span><span class="p">)</span>
+<span class="c1">// Hello World, I&#39;m John!</span></code></pre></div>
+
+<p>We most probably have been doing this kind of stuff everyday. As it turns out, instance methods in Swift are just curried functions partially applied with the instance itself as the first parameter. So we can do stuff like this:</p>
+
+<div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">let</span> <span class="n">greeter</span> <span class="o">=</span> <span class="n">Robot</span><span class="p">.</span><span class="n">greet</span>
+<span class="c1">// Robot -&gt; String -&gt; String</span></code></pre></div>
+
+<p>Which will take a <code>Robot</code> as the first parameter, a <code>String</code> as the second, and return a <code>String</code></p>
+
+<div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="n">greeter</span><span class="p">(</span><span class="n">john</span><span class="p">)(</span><span class="s">&quot;Middle Earth&quot;</span><span class="p">)</span>
+<span class="c1">// Hello Middle Earth, I&#39;m John!</span>
+
+<span class="k">let</span> <span class="n">jane</span> <span class="o">=</span> <span class="n">Robot</span><span class="p">(</span><span class="nl">name</span><span class="p">:</span> <span class="s">&quot;Jane&quot;</span><span class="p">)</span>
+<span class="n">greeter</span><span class="p">(</span><span class="n">jane</span><span class="p">)(</span><span class="s">&quot;Westeros&quot;</span><span class="p">)</span>
+<span class="c1">// Hello Westeros, I&#39;m Jane!</span></code></pre></div>
+
+<p>So this is currying in a nutshell. Please go ahead and use it in awesome ways.</p>
+
+      </div>
+    </div>
+
+    <div class="author">
+  <div class="author-image">
+  	<img src="../assets/phelgo.jpg" alt="phelgo">
+  </div>
+  <div class="author-content">
+  	<p class="author-name" >Written by Francisco Costa<br><a href="https://twitter.com/phelgo">@phelgo</a></p>
+  </div>
+</div>
+
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <p class="license">SwiftAlgorithms.com is published under a <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons BY-NC-SA License</a>.</p>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>
