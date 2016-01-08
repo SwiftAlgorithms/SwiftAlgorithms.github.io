@@ -5,8 +5,16 @@
     <description>Delicious algorithms for Swift</description>
     <link>http://swiftalgorithms.com/</link>
     <atom:link href="http://swiftalgorithms.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sun, 25 Oct 2015 12:26:40 +0100</pubDate>
-    <lastBuildDate>Sun, 25 Oct 2015 12:26:40 +0100</lastBuildDate>
+    <pubDate>Fri, 08 Jan 2016 16:40:58 +0100</pubDate>
+    <lastBuildDate>Fri, 08 Jan 2016 16:40:58 +0100</lastBuildDate>
+    
+      <item>
+        <title>Functors</title>
+        <description>Functors in Swift</description>
+        <pubDate>Fri, 08 Jan 2016 00:00:00 +0100</pubDate>
+        <link>http://swiftalgorithms.com/Functors</link>
+        <guid isPermaLink="true">http://swiftalgorithms.com/Functors</guid>
+      </item>
     
       <item>
         <title>Currying</title>

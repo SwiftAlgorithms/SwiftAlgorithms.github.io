@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Functors - Swift Algorithms</title>
+  <meta name="description" content="Functors in Swift">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://swiftalgorithms.com/Functors">
+  <link rel="alternate" type="application/rss+xml" title="Swift Algorithms" href="http://swiftalgorithms.com/feed.xml" />
+  <script src="assets/ph.js" type="text/javascript"></script>
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/"><img src="../assets/logo.png" alt="Swift Algorithms">Swift Algorithms</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+
+
+
+      <div class="wrapper">
+
+        <h1 class="post-title">Functors</h1>
+
+        <p>Functors are beautiful. They can make our code much cleaner and easier to handle. Let&#39;s go ahead and functor all the things.</p>
+
+<p>Optionals are one of the simplest functors we can define. They are also at the heart of the Swift language, so let&#39;s take a look at a possible implementation:</p>
+
+<div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">enum</span> <span class="n">_Optional</span><span class="o">&lt;</span><span class="n">Wrapped</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="n">Some</span><span class="p">(</span><span class="n">Wrapped</span><span class="p">)</span>
+    <span class="k">case</span> <span class="n">None</span>
+<span class="p">}</span></code></pre></div>
+
+<p>An <code>Optional</code> is just an <code>enum</code> with two cases. It is either <code>.Some</code> with an associated value or <code>.None</code>. With this in mind, instead of the <code>?</code> syntax, we can simply use <code>enum</code> syntax to define optional values:</p>
+
+<div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">let</span> <span class="n">optionalGreeting</span> <span class="o">=</span> <span class="n">Optional</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="p">.</span><span class="n">Some</span><span class="p">(</span><span class="s">&quot;Hello World!&quot;</span><span class="p">)</span>
+<span class="k">let</span> <span class="n">nothing</span> <span class="o">=</span> <span class="n">Optional</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="p">.</span><span class="n">None</span></code></pre></div>
+
+<p>One of the things that immediatly becomes apparent and that may be different from most other languages is that the <code>nil</code> concept in Swift is actually typed <code>Optional&lt;Wrapped&gt;</code>, which adds a lot of safety to the code.</p>
+
+<p>Here you can see my artistic skills in action, this is a visualization of the <code>Optional</code>:</p>
+
+<p><img src="../assets/functors01.png" alt="Optional"></p>
+
+<p>In this piece of abstract art, the outer circle represents a context and you can see that the <code>Optional</code> is just that, a context for a value of some type. This is pretty close to the definition of a <code>Functor</code> as well: a context for some value that can be mapped.</p>
+
+<p>So a defining characteristic of a functor is that there is a function or a method that we can use to <code>map</code> it. In other words, we can somehow take the value out of its context, apply a function to it, and wrap the result inside the context again.</p>
+
+<p>For the <code>Optional</code> a possible implementation could look like this:</p>
+
+<div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">func</span> <span class="n">_map</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">U</span><span class="o">&gt;</span><span class="p">(</span><span class="nl">a</span><span class="p">:</span> <span class="n">Optional</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">_</span> <span class="nl">f</span><span class="p">:</span> <span class="n">T</span> <span class="o">-&gt;</span> <span class="n">U</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="o">&lt;</span><span class="n">U</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="k">switch</span> <span class="n">a</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="p">.</span><span class="n">Some</span><span class="p">(</span><span class="k">let</span> <span class="n">x</span><span class="p">)</span><span class="o">:</span> <span class="k">return</span> <span class="p">.</span><span class="n">Some</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+    <span class="k">case</span> <span class="p">.</span><span class="nl">None</span><span class="p">:</span> <span class="k">return</span> <span class="p">.</span><span class="n">None</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></div>
+
+<p>This is more or less what the <code>map</code> method from the standard library does already. The type signature <code>(Optional&lt;T&gt;, T -&gt; U) -&gt; Optional&lt;U&gt;</code> tells us most of what is going on. We take an optional and a function, somehow smash them together, and get an optional as the result. Note how the function <code>f</code> is simply <code>T -&gt; U</code>, there is no <code>Optional</code> in there.</p>
+
+<p>We can visualize the function simply like this (no functors involved):</p>
+
+<p><img src="../assets/functors02.png" alt="Optional"></p>
+
+<p>This is the beauty of functors: using <code>map</code> we can apply them functions that know nothing about functors and still get a functor as result:</p>
+
+<p><img src="../assets/functors03.png" alt="Optional"></p>
+
+<p>So if we initially had this kind of code:</p>
+
+<div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">func</span> <span class="n">increment</span><span class="p">(</span><span class="nl">a</span><span class="p">:</span> <span class="n">Int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Int</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="mi">1</span>
+<span class="p">}</span></code></pre></div>
+
+<p>But then we realize that <code>a</code> may need to be <code>Optional</code> (perhaps its a counter that comes from a server API), we may be tempted to mess up our code like this:</p>
+
+<div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">func</span> <span class="n">incrementOptionally</span><span class="p">(</span><span class="nl">a</span><span class="p">:</span> <span class="n">Int</span><span class="o">?</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Int</span><span class="o">?</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="k">let</span> <span class="n">a</span> <span class="o">=</span> <span class="n">a</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nb">nil</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></div>
+
+<p>Our code was super simple and clean just a few moments ago but now we have <code>Optional</code> and <code>nil</code> all over the place. This could look a lot better. Let&#39;s try to do the same with some functor beauty, using <code>map</code>:</p>
+
+<div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">let</span> <span class="nl">optionalValue</span><span class="p">:</span> <span class="n">Int</span><span class="o">?</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="k">let</span> <span class="n">incrementedValue</span> <span class="o">=</span> <span class="n">optionalValue</span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="n">increment</span><span class="p">)</span>
+<span class="c1">// Optional&lt;Int&gt;(2)</span></code></pre></div>
+
+<p>This is far better, we managed to use our original <code>Int -&gt; Int</code> function on an optional value, and get an optional result, as we should.</p>
+
+<p>If now we want to define a default value instead of <code>nil</code>, unwrapping it along the way, we can also do it quite simply with the nil coalescing operator <code>??</code>:</p>
+
+<div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">let</span> <span class="n">anotherIncrementedValue</span> <span class="o">=</span> <span class="n">optionalValue</span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="n">increment</span><span class="p">)</span> <span class="o">??</span> <span class="mi">0</span></code></pre></div>
+
+<p>Using <code>map</code> we don&#39;t need to lock down our functions and methods to optional values anymore, we just operate on the values themselves and let <code>map</code> do all the unwrapping for us. This is even cooler when we realize that now we can use our functions with other functors as well that implement <code>map</code>, such as <code>Array</code>:</p>
+
+<div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">func</span> <span class="n">_map</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">U</span><span class="o">&gt;</span><span class="p">(</span><span class="nl">array</span><span class="p">:</span> <span class="n">Array</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">_</span> <span class="nl">f</span><span class="p">:</span> <span class="n">T</span> <span class="o">-&gt;</span> <span class="n">U</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="o">&lt;</span><span class="n">U</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="k">var</span> <span class="nl">newArray</span><span class="p">:</span> <span class="p">[</span><span class="n">U</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">element</span> <span class="k">in</span> <span class="n">array</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="n">newElement</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+        <span class="n">newArray</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">newElement</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">newArray</span>
+<span class="p">}</span>
+
+<span class="k">let</span> <span class="n">mappedArray</span> <span class="o">=</span> <span class="n">_map</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="n">increment</span><span class="p">)</span>
+<span class="c1">//[2, 4, 8]</span></code></pre></div>
+
+<p>Or using the built-in <code>map</code> method:</p>
+
+<div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">let</span> <span class="n">anotherMappedArray</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">].</span><span class="n">map</span><span class="p">(</span><span class="n">increment</span><span class="p">)</span>
+<span class="c1">//[2, 4, 8]</span></code></pre></div>
+
+<p>Because both optionals and arrays are functors, we can reuse our non-functor function on both of them, just by using a touch of <code>map</code> magic.</p>
+
+<p>Whenever we see a function on our code that takes <code>Optional&lt;T&gt;</code> or <code>Array&lt;T&gt;</code> (or any <code>Functor&lt;T&gt;</code> really) as parameters, we may consider rewriting it to just take <code>T</code> and then calling it with <code>map</code> for the specific functor context. More often than not, our code will be more reusable and easier to read as a result.</p>
+
+<p>In a nutshell, a functor is a special context that gives extra powers to some type <code>T</code>:</p>
+
+<p><code>Optional&lt;T&gt;</code> gives the possibility to have no value in there, <code>nil</code>.</p>
+
+<p><code>Array&lt;T&gt;</code> allows us to have multiple ordered values.</p>
+
+<p><code>Result&lt;T&gt;</code>, also a functor, introduces the alternatives of both <code>Success&lt;T&gt;</code> and <code>Failure</code>.</p>
+
+<p><code>Future&lt;T&gt;</code> makes it possbile to work with values that will come from some async operation but are not there yet.</p>
+
+<p><code>Signal&lt;T&gt;</code> represents a stream of values that are produced over time.</p>
+
+<p>What all these functors have in common is that if we keep our functions simply as <code>T -&gt; U</code> we can apply them to all these functors using <code>map</code>. Pretty neat!</p>
+
+<h3>Operator Overload</h3>
+
+<p>We will be using <code>map</code> so much in our code that it might be useful to define a shortchut operator for it. The open source <a href="https://github.com/thoughtbot/runes">Runes framework</a> defines some Haskell-inspired operators, including <code>&lt;ˆ&gt;</code> for <code>map</code>:</p>
+
+<div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="kr">infix</span> <span class="kr">operator</span> <span class="o">&lt;^&gt;</span> <span class="p">{</span> <span class="kr">associativity</span> <span class="kr">left</span> <span class="p">}</span>
+
+<span class="k">func</span> <span class="o">&lt;^&gt;&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">U</span><span class="o">&gt;</span><span class="p">(</span><span class="nl">f</span><span class="p">:</span> <span class="n">T</span> <span class="o">-&gt;</span> <span class="n">U</span><span class="p">,</span> <span class="nl">a</span><span class="p">:</span> <span class="n">T</span><span class="o">?</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">U</span><span class="o">?</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">a</span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<span class="p">}</span></code></pre></div>
+
+<p>This allows us to write one-liners like this:</p>
+
+<div class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">let</span> <span class="n">yetAnotherIncrementedValue</span> <span class="o">=</span> <span class="n">increment</span> <span class="o">&lt;^&gt;</span> <span class="n">optionalValue</span>
+<span class="c1">// Optional&lt;Int&gt;(2)</span></code></pre></div>
+
+<p>Lovely.</p>
+
+      </div>
+    </div>
+
+    <div class="author">
+  <div class="author-image">
+  	<img src="../assets/phelgo.jpg" alt="phelgo">
+  </div>
+  <div class="author-content">
+  	<p class="author-name" >Written by Francisco Costa<br><a href="https://twitter.com/phelgo">@phelgo</a></p>
+  </div>
+</div>
+
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <p class="license">SwiftAlgorithms.com is published under a <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons BY-NC-SA License</a>.</p>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>
